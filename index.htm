@@ -1,0 +1,120 @@
+<html lang="cs">
+    <head>
+        <meta charset="utf-8">
+        <title>Dokreslené daně</title>
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.css" integrity="sha256-gl80aFE+bSTFw7UJf+ne/RkwC55cjidIp0Oe3AX5pfo=" crossorigin="anonymous" />
+        <style>
+            body {
+                font-family: Roboto, Arial;
+            }
+            svg .c3-xgrid-line text {
+                font-size: 2em;
+            }
+            svg .c3-axis-x-label, 
+            svg .c3-axis-y-label {
+                font-size: 1.3em;
+            }
+        </style>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.js" integrity="sha256-mlJR4DaLFvEBAgHcavz/vASrM6RrzcQq2lXDBwMixZU=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js" integrity="sha256-8E6QUcFg1KTnpEU8TFGhpTGHw5fJqB9vCms3OhAYLqw=" crossorigin="anonymous"></script>
+
+        <!-- This svinstvo is kindly borrowed from much better site https://nespravedlive-dane.cz -->
+        <script src="https://nespravedlive-dane.cz/svinstvo.js"></script>
+
+        <meta property="og:type" content="article">
+        <meta property="og:title" content="Dokreslené daně">
+        <meta property="og:description" content="Dokreslený graf dopadů nové daně">
+        <meta property="og:url" content="http://slajchrt.cz/spravedlive-dane.htm">
+        <meta property="og:image" content="http://slajchrt.cz/graf.png">
+        <meta property="article:author" content="http://slajchrt.cz/">
+
+    </head>
+
+    <body>
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-34094995-2', 'auto');
+            ga('send', 'pageview');
+        </script>
+
+        <div id="chart" style="height:97%"></div>
+        <div style="text-align: center; color: #666; margin-top: 5px; font-size: .75em">
+            O kolik si polepšíš přesně, můžes spočítat na <a  style="color: #e80; text-decoration: underline" target="_blank" href="https://www.nespravedlive-dane.cz">nespravedlive-dane.cz</a>
+        </div>
+        
+        <script>
+
+            var format = d3.format(',.');
+            var salaries = _.range(5000, 100000, 5000);
+            var salariesCombined = salaries.map(function(salary) { 
+                return computeSalary(salary, []);
+            });
+            var difference = salariesCombined.map(function(combined) {
+                return combined.new.total - combined.current.total;
+            });
+
+            c3.generate({
+                bindto: '#chart',
+                data: {
+                    x: 'salary',
+                    columns: [
+                        ['salary'].concat(salaries),
+                        ['rozdil'].concat(difference)
+                    ],
+                    names: {
+                        'rozdil': 'Polepšíš si o'
+                    },
+                    colors: {
+                        'rozdil': '#f90',
+                    },
+                    types: {
+                        'rozdil': 'bar',
+                    },
+                    labels: {
+                        format: format
+                    },
+                },
+                grid: {
+                    y: {
+                        lines: [{value: 0}]
+                    },
+                    x: {
+                        lines: [
+                            { value: 47500, text: "Až sem to Bohouš ukázal", position: 'middle' }
+                        ]
+                    }
+                },
+                axis: {
+                    x: {
+                        label: {
+                            text: 'Kolik bereš (Kč)',
+                            position: 'outer-center'
+                        }
+                    },
+                    y: {
+                        label: {
+                            text: 'O kolik si polepšíš (Kč)',
+                            position: 'outer-middle'
+                        }
+                    }
+                },
+                legend: {
+                    show: false
+                },
+                tooltip: {
+                    format: {
+                        title: function (d) { return '' + format(d) + ' Kč hrubého'; },
+                        value: function (value, ratio, id) {
+                            return format(value) + ' Kč';
+                        }
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
