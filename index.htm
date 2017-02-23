@@ -15,6 +15,9 @@
             svg .c3-axis-y-label {
                 font-size: 1.3em;
             }
+            #chart2 .c3-line-newtaxes {
+                 stroke-width: 4px;
+            }
         </style>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js" integrity="sha256-dsOXGNHAo/syFnazt+KTBsCQeRmlcW1XKL0bCK4Baec=" crossorigin="anonymous"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.11/c3.min.js" integrity="sha256-mlJR4DaLFvEBAgHcavz/vASrM6RrzcQq2lXDBwMixZU=" crossorigin="anonymous"></script>
@@ -42,13 +45,88 @@
             ga('send', 'pageview');
         </script>
 
-        <div id="chart" style="height:97%"></div>
+        <div id="chart2" style="height:67%"></div>
+        <div id="chart" style="height:30%"></div>
         <div style="text-align: center; color: #666; margin-top: 5px; font-size: .75em">
             O kolik si polepšíš přesně, můžes spočítat na <a  style="color: #e80; text-decoration: underline" target="_blank" href="https://www.nespravedlive-dane.cz">nespravedlive-dane.cz</a>
         </div>
         
         <script>
+            var format = d3.format(',.');
+            var salaries = _.range(5000, 100000, 5000);
+            var salariesCombined = salaries.map(function(salary) { 
+                return computeSalary(salary, []);
+            });
+            var taxes = salariesCombined.map(function(combined) {
+                return combined.current.grossSalary - combined.current.total; // taxes ( dan + zdrav + soc )
+            });
+            var newtaxes = salariesCombined.map(function(combined) {
+                return combined.new.grossSalary - combined.new.total;
+            });
 
+            c3.generate({
+                bindto: '#chart2',
+                data: {
+                    x: 'salary',
+                    columns: [
+                        ['salary'].concat(salaries),
+                        ['oldtaxes'].concat(taxes),
+                        ['newtaxes'].concat(newtaxes)
+                    ],
+                    names: {
+                        'oldtaxes': 'Stát dnes vezme',
+                        'newtaxes' : 'Sobotka chce vzít'
+                    },
+                    colors: {
+                        'oldtaxes': '#f90',
+                    },
+                    types: {
+                        'oldtaxes': 'bar',
+                        'newtaxes': 'line',
+                    },
+                    labels: {
+                        format: format
+                    },
+                },
+                grid: {
+                    y: {
+                        lines: [{value: 0}]
+                    },
+                    x: {
+                        lines: [
+                            { value: 47500, text: "Až sem to Bohouš ukázal", position: 'middle' }
+                        ]
+                    }
+                },
+                axis: {
+                    x: {
+                        label: {
+                            text: 'Hrubá mzda (Kč)',
+                            position: 'outer-center'
+                        }
+                    },
+                    y: {
+                        label: {
+                            text: 'Kolik stát / Sobotka vezme na daních (Kč)',
+                            position: 'outer-middle'
+                        }
+                    }
+                },
+                legend: {
+                    show: false
+                },
+                tooltip: {
+                    format: {
+                        title: function (d) { return '' + format(d) + ' Kč hrubého'; },
+                        value: function (value, ratio, id) {
+                            return format(value) + ' Kč';
+                        }
+                    }
+                }
+            });
+        </script>
+
+        <script>
             var format = d3.format(',.');
             var salaries = _.range(5000, 100000, 5000);
             var salariesCombined = salaries.map(function(salary) { 
